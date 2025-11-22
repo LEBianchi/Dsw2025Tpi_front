@@ -12,3 +12,16 @@ export const getProducts = async (search = null, status = null, pageNumber = 1, 
 
   return { data: response.data, error: null };
 };
+
+export const getProductsClient =  async (search = null, pageNumber = 1, pageSize = 10 ) => {
+  const queryString = new URLSearchParams({
+    search: search || '',
+    pageNumber,
+    pageSize,
+    status: 'enabled'
+  });
+
+  const response = await instance.get(`api/products?${queryString}`);
+
+  return { data: response.data, error: null };
+};
