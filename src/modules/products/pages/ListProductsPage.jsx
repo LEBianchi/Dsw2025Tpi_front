@@ -1,39 +1,49 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Button from '../../shared/components/Button';
 import Card from '../../shared/components/Card';
-import { getProducts } from '../services/list';
+import { getAdminProducts } from '../services/list';
 
-const productStatus = {
-  ALL: 'all',
-  ENABLED: 'enabled',
-  DISABLED: 'disabled',
-};
+const productStatusOptions = [
+  { label: 'Estado de Producto (Todos)', value: '' },
+  { label: 'Activo', value: 'true' },
+  { label: 'Inactivo', value: 'false' },
+];
 
 function ListProductsPage() {
   const navigate = useNavigate();
 
-  const [ searchTerm, setSearchTerm ] = useState('');
-  const [ status, setStatus ] = useState(productStatus.ALL);
-  const [ pageNumber, setPageNumber ] = useState(1);
-  const [ pageSize, setPageSize ] = useState(10);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [status, setStatus] = useState('');
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize] = useState(5);
 
-  const [ total, setTotal ] = useState(0);
-  const [ products, setProducts ] = useState([]);
-
+  const [total, setTotal] = useState(0);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const { data, error } = await getProducts(searchTerm, status, pageNumber, pageSize);
+
+      const statusToSend = status === '' ? null : status;
+
+      console.log('🔍 Buscando:', { searchTerm, status: statusToSend, pageNumber, pageSize });
+
+      const result = await getAdminProducts(searchTerm, statusToSend, pageNumber, pageSize);
+      const { data, error } = result;
 
       if (error) throw error;
 
-      setTotal(data.total);
-      setProducts(data.productItems);
+      const lista = data?.productItems || data?.items || [];
+      const totalItems = data?.total || 0;
+
+      setProducts(lista);
+      setTotal(totalItems);
+
     } catch (error) {
-      console.error(error);
+      console.error('Error al cargar productos:', error);
+      setProducts([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
@@ -41,99 +51,127 @@ function ListProductsPage() {
 
   useEffect(() => {
     fetchProducts();
-  }, [status, pageSize, pageNumber]);
+  }, [status, pageNumber, pageSize]);
 
-  const totalPages = Math.ceil(total / pageSize);
-
-  const handleSearch = async () => {
-    await fetchProducts();
+  const handleSearch = () => {
+    setPageNumber(1);
+    fetchProducts();
   };
 
+  const totalPages = Math.max(1, Math.ceil((total || 0) / pageSize));
+
   return (
-    <div>
-      <Card>
-        <div
-          className='flex justify-between items-center mb-3'
-        >
-          <h1 className='text-3xl'>Productos</h1>
-          <Button
-            className='h-11 w-11 rounded-2xl sm:hidden'
-          >
-            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M5 11C4.44772 11 4 10.5523 4 10C4 9.44772 4.44772 9 5 9H15C15.5523 9 16 9.44772 16 10C16 10.5523 15.5523 11 15 11H5Z" fill="#000000"></path> <path d="M9 5C9 4.44772 9.44772 4 10 4C10.5523 4 11 4.44772 11 5V15C11 15.5523 10.5523 16 10 16C9.44772 16 9 15.5523 9 15V5Z" fill="#000000"></path> </g></svg>
-          </Button>
+    <div className="p-4 space-y-4">
 
-          <Button
-            className='hidden sm:block'
-            onClick={() => navigate('/admin/products/create')}
-          >
-            Crear Producto
-          </Button>
-        </div>
+      <Card className="p-4 bg-white rounded-lg shadow-sm">
+        <div className="flex flex-col gap-4">
 
-        <div className='flex flex-col sm:flex-row gap-4'>
-          <div
-            className='flex items-center gap-3'
-          >
-            <input value={searchTerm} onChange={(evt) => setSearchTerm(evt.target.value)} type="text" placeholder='Buscar' className='text-[1.3rem] w-full' />
-            <Button className='h-11 w-11' onClick={handleSearch}>
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M15.7955 15.8111L21 21M18 10.5C18 14.6421 14.6421 18 10.5 18C6.35786 18 3 14.6421 3 10.5C3 6.35786 6.35786 3 10.5 3C14.6421 3 18 6.35786 18 10.5Z" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path> </g></svg>
-            </Button>
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold text-gray-800">Productos</h2>
+            <button
+              onClick={() => navigate('/admin/products/create')}
+              className="bg-purple-100 text-purple-700 px-4 py-2 rounded-md font-medium hover:bg-purple-200 transition"
+            >
+              Crear Producto
+            </button>
           </div>
-          <select onChange={evt => setStatus(evt.target.value)} className='text-[1.3rem]'>
-            <option value={productStatus.ALL}>Todos</option>
-            <option value={productStatus.ENABLED}>Habilitados</option>
-            <option value={productStatus.DISABLED}>Inhabilitados</option>
-          </select>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-1 gap-2">
+              <input
+                type="text"
+                placeholder="Buscar"
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              />
+              <button
+                onClick={handleSearch}
+                className="bg-purple-100 text-purple-700 p-2 rounded-md hover:bg-purple-200"
+              >
+                🔍
+              </button>
+            </div>
+
+            <select
+              className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-200 min-w-[220px]"
+              value={status}
+              onChange={(e) => {
+                setStatus(e.target.value);
+                setPageNumber(1);
+              }}
+            >
+              {productStatusOptions.map((opt) => (
+                <option key={opt.label} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </Card>
 
-      <div className='mt-4 flex flex-col gap-4'>
-        {
-          loading
-            ? <span>Buscando datos...</span>
-            : products.map(product => (
-              <Card key={product.sku}>
-                <h1>{product.sku} - {product.name}</h1>
-                <p className='text-base'>Stock: {product.stockQuantity} - ${product.currentUnitPrice} - {product.isActive ? 'Activado' : 'Desactivado'}</p>
-              </Card>
-            ))
-        }
+      <div className="space-y-3">
+        {loading ? (
+          <div className="text-center py-10 text-gray-500">Cargando productos...</div>
+        ) : products.length === 0 ? (
+          <div className="text-center py-10 text-gray-500 bg-white rounded shadow-sm">No hay productos.</div>
+        ) : (
+          products.map((product) => (
+            <Card key={product.id || product.sku} className="hover:shadow-md transition-shadow bg-white rounded-lg p-4 border border-gray-100">
+              <div className="flex justify-between items-center">
+
+                <div className="flex flex-col">
+                  <h3 className="text-lg font-bold text-gray-900">
+                    {product.sku} - {product.name}
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Stock: {product.stockQuantity} - {product.isActive ? 'Activo' : 'Inactivo'}
+                  </p>
+                </div>
+
+                <button
+                  className="bg-purple-100 text-purple-700 px-6 py-2 rounded-md font-medium hover:bg-purple-200 transition"
+                  onClick={() => console.log('Ver detalle', product.id)}
+                >
+                  Ver
+                </button>
+
+              </div>
+            </Card>
+          ))
+        )}
       </div>
 
-      <div className='flex justify-center items-center mt-3'>
-        <button
-          disabled={pageNumber === 1}
-          onClick={() => setPageNumber(pageNumber - 1)}
-          className='bg-gray-200 disabled:bg-gray-100'
-        >
-          Atras
-        </button>
-        <span>{pageNumber} / {totalPages}</span>
-        <button
-          disabled={ pageNumber === totalPages }
-          onClick={() => setPageNumber(pageNumber + 1)}
-          className='bg-gray-200 disabled:bg-gray-100'
-        >
-          Siguiente
-        </button>
+      {total > 0 && (
+        <div className="flex justify-center items-center gap-4 py-4 text-sm text-gray-600">
+          <button
+            disabled={pageNumber === 1}
+            onClick={() => setPageNumber(p => p - 1)}
+            className="hover:text-black disabled:opacity-30 disabled:hover:text-gray-600 flex items-center gap-1"
+          >
+            ← Previous
+          </button>
 
-        <select
-          value={pageSize}
-          onChange={evt => {
-            setPageNumber(1);
-            setPageSize(Number(evt.target.value));
-          }}
-          className='ml-3'
-        >
-          <option value="2">2</option>
-          <option value="10">10</option>
-          <option value="15">15</option>
-          <option value="20">20</option>
-        </select>
-      </div>
+          <div className="flex gap-2">
+            <span className="bg-gray-900 text-white w-8 h-8 flex items-center justify-center rounded">
+              {pageNumber}
+            </span>
+          </div>
+
+          <button
+            disabled={pageNumber >= totalPages}
+            onClick={() => setPageNumber(p => p + 1)}
+            className="hover:text-black disabled:opacity-30 disabled:hover:text-gray-600 flex items-center gap-1"
+          >
+            Next →
+          </button>
+        </div>
+      )}
+
     </div>
-
   );
-};
+}
 
 export default ListProductsPage;

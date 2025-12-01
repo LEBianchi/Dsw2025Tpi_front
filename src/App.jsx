@@ -8,26 +8,24 @@ import Home from './modules/home/pages/Home';
 import ListProductsPage from './modules/products/pages/ListProductsPage';
 import CreateProductPage from './modules/products/pages/CreateProductPage';
 import ClientProductsPage from './modules/products/pages/ClientProductsPage';
-
-
-
+import CartPage from './modules/orders/pages/CartPage';
 
 function App() {
   const router = createBrowserRouter([
- {
-  path: '/',
-  element: <><Outlet /></>,
-  children: [
     {
       path: '/',
-      element: <ClientProductsPage />,
+      element: <><Outlet /></>,
+      children: [
+        {
+          path: '/',
+          element: <ClientProductsPage />,
+        },
+        {
+          path: '/cart',
+          element: <CartPage />,
+        },
+      ],
     },
-    {
-      path: '/cart',
-      element: <>Carrito de compras</>,
-    },
-  ],
-},
     {
       path: '/login',
       element: <LoginPage />,
@@ -35,27 +33,15 @@ function App() {
     {
       path: '/admin',
       element: (
-        <ProtectedRoute>
+        <ProtectedRoute allowedRoles={['Admin']}>
           <Dashboard />
         </ProtectedRoute>
       ),
       children: [
-        {
-          path: '/admin/home',
-          element: <Home />,
-        },
-        {
-          path: '/admin/products',
-          element: <ListProductsPage />,
-        },
-        {
-          path: '/admin/products/create',
-          element: <CreateProductPage />,
-        },
-        {
-          path: '/admin/orders',
-          element: <ListOrdersPage />,
-        },
+        { path: '/admin/home', element: <Home /> },
+        { path: '/admin/products', element: <ListProductsPage /> },
+        { path: '/admin/products/create', element: <CreateProductPage /> },
+        { path: '/admin/orders', element: <ListOrdersPage /> },
       ],
     },
   ]);

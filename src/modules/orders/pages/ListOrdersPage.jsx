@@ -1,34 +1,27 @@
 import { useEffect, useState } from 'react';
-
-import { useNavigate } from 'react-router-dom';
-
 import Button from '../../shared/components/Button';
-
 import Card from '../../shared/components/Card';
-
 import { listOrders } from '../services/listServices';
 
-
 const statusLabels = {
-  'PENDING': 'Pendiente',    
-  'PROCESSING': 'Procesando',   
-  'SHIPPED': 'Enviado',      
-  'DELIVERED': 'Entregado',    
-  'CANCELLED': 'Cancelado',    
+  'PENDING': 'Pendiente',
+  'PROCESSING': 'Procesando',
+  'SHIPPED': 'Enviado',
+  'DELIVERED': 'Entregado',
+  'CANCELLED': 'Cancelado',
 };
-
 
 const getStatusChipClass = (status) => {
   switch (status) {
-    case 1: 
+    case 1:
       return 'bg-yellow-100 text-yellow-800';
-    case 2: 
+    case 2:
       return 'bg-blue-100 text-blue-800';
-    case 3: 
+    case 3:
       return 'bg-indigo-100 text-indigo-800';
-    case 4: 
+    case 4:
       return 'bg-green-100 text-green-800';
-    case 5: 
+    case 5:
       return 'bg-red-100 text-red-800';
     default:
       return 'bg-gray-100 text-gray-800';
@@ -36,7 +29,6 @@ const getStatusChipClass = (status) => {
 };
 
 function ListOrdersPage() {
-  const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [status, setStatus] = useState('');
@@ -56,34 +48,33 @@ function ListOrdersPage() {
         search: searchTerm,
       };
 
-      
       if (status !== '') {
         filters.status = status;
       }
 
-      console.log("1. Enviando filtros al servicio:", filters);
+      console.log('1. Enviando filtros al servicio:', filters);
 
       const data = await listOrders(filters);
 
-      console.log("2. Respuesta del Backend:", data);
-      console.log("3. Chequeo de propiedades: ");
-      console.log("   - data.total:", data?.total);
-      console.log("   - data.items:", data?.items); 
-      console.log("   - data.productItems:", data?.productItems);
+      console.log('2. Respuesta del Backend:', data);
+      console.log('3. Chequeo de propiedades: ');
+      console.log('   - data.total:', data?.total);
+      console.log('   - data.items:', data?.items);
+      console.log('   - data.productItems:', data?.productItems);
 
       const listaFinal = data?.items || data?.productItems || [];
-      
-      console.log("4. Lista final a guardar en estado:", listaFinal);
+
+      console.log('4. Lista final a guardar en estado:', listaFinal);
 
       if (listaFinal.length === 0) {
-        console.warn("La lista está vacía. ¿La base de datos tiene órdenes?");
+        console.warn('La lista está vacía. ¿La base de datos tiene órdenes?');
       }
 
       setTotal(data?.total || 0);
       setOrders(listaFinal);
 
     } catch (error) {
-      console.error(" Error  en fetchOrders:", error);   
+      console.error(' Error  en fetchOrders:', error);
     } finally {
       setLoading(false);
     }
@@ -91,12 +82,14 @@ function ListOrdersPage() {
 
   useEffect(() => {
     fetchOrders();
+    //Lo silencio porque si hago que le quiere se puede generar un bucle infinito
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, pageSize, pageNumber]);
 
   const totalPages = Math.ceil(total / pageSize);
 
   const handleSearch = async () => {
-    console.log("Buscando manualmente:", searchTerm);
+    console.log('Buscando manualmente:', searchTerm);
     setPageNumber(1);
     await fetchOrders();
   };
@@ -106,55 +99,54 @@ function ListOrdersPage() {
       <Card>
         <div className='flex justify-between items-center mb-3'>
           <h1 className='text-3xl font-bold'>Ordenes</h1>
-          <div className='h-11 w-11 sm:hidden'></div> 
+          <div className='h-11 w-11 sm:hidden'></div>
         </div>
 
         <div className='flex flex-col sm:flex-row gap-4'>
           <div className='flex items-center gap-3 w-full relative'>
-            <input 
-              value={searchTerm} 
-              onChange={(evt) => setSearchTerm(evt.target.value)} 
-              type="text" 
-              placeholder='Buscar ordenes...' 
+            <input
+              value={searchTerm}
+              onChange={(evt) => setSearchTerm(evt.target.value)}
+              type="text"
+              placeholder='Buscar ordenes...'
               className='text-lg w-full border-b focus:outline-none focus:border-purple-500 py-2 pl-2 pr-12'
             />
-            
-            <Button 
+
+            <Button
               className='h-11 w-11 flex justify-center items-center absolute right-0 !bg-purple-100 rounded-lg'
               onClick={handleSearch}
             >
-              <svg 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                xmlns="http://www.w3.org/2000/svg" 
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
                 className="w-6 h-6"
               >
-                <path 
-                  d="M15.7955 15.8111L21 21M18 10.5C18 14.6421 14.6421 18 10.5 18C6.35786 18 3 14.6421 3 10.5C3 6.35786 6.35786 3 10.5 3C14.6421 3 18 6.35786 18 10.5Z" 
+                <path
+                  d="M15.7955 15.8111L21 21M18 10.5C18 14.6421 14.6421 18 10.5 18C6.35786 18 3 14.6421 3 10.5C3 6.35786 6.35786 3 10.5 3C14.6421 3 18 6.35786 18 10.5Z"
                   stroke="#6b21a8"
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
+                  strokeWidth="2"
+                  strokeLinecap="round"
                   strokeLinejoin="round"
-                /> 
+                />
               </svg>
             </Button>
           </div>
 
-          
-          <select 
+          <select
             onChange={evt => {
               setStatus(evt.target.value);
               setPageNumber(1);
-            }} 
+            }}
             className='text-lg border-b bg-transparent focus:outline-none py-2'
             value={status}
           >
             <option value="">Estado de Orden</option>
-            <option value="1">Pendientes</option>    
-            <option value="2">Procesando</option>    
-            <option value="3">Enviadas</option>      
-            <option value="4">Entregadas</option>    
-            <option value="5">Canceladas</option>    
+            <option value="1">Pendientes</option>
+            <option value="2">Procesando</option>
+            <option value="3">Enviadas</option>
+            <option value="4">Entregadas</option>
+            <option value="5">Canceladas</option>
           </select>
         </div>
       </Card>
@@ -166,8 +158,7 @@ function ListOrdersPage() {
           </div>
         ) : orders.length > 0 ? (
           orders.map(order => {
-            //const statusCode = Number(order.status); 
-            //debugger
+
             return (
               <Card key={order.orderId || Math.random()} className="hover:shadow-md transition-shadow">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -180,7 +171,7 @@ function ListOrdersPage() {
                       {statusLabels[order.status] || 'Estado desconocido'}
                     </p>
                   </div>
-                  
+
                   <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
                     <span
                       className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusChipClass(order.status)}`}
@@ -188,7 +179,7 @@ function ListOrdersPage() {
                       {statusLabels[order.status] || 'Estado desconocido'}
                     </span>
 
-                    <Button onClick={() => console.log("Ver detalle", order.orderId)}>
+                    <Button onClick={() => console.log('Ver detalle', order.orderId)}>
                       Ver
                     </Button>
                   </div>
@@ -212,9 +203,9 @@ function ListOrdersPage() {
         >
           Atras
         </button>
-        
+
         <span className="font-bold text-gray-700">{pageNumber} / {totalPages || 1}</span>
-        
+
         <button
           disabled={pageNumber >= totalPages}
           onClick={() => setPageNumber(pageNumber + 1)}

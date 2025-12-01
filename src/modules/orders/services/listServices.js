@@ -7,9 +7,9 @@ export const listOrders = async (filters = {}) => {
       pageSize: filters.pageSize || 10,
       Search: filters.search || null,
       Status: filters.status == 'Todos' ? null : filters.status || null,
-    } 
-  ,
+    }
+    ,
   });
 
- return response.data;
+  return response.data;
 };
