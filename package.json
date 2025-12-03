@@ -1,5 +1,5 @@
 {
-  "name": "unidad-5",
+  "name": "dsw2025tpi_front",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -16,6 +16,7 @@
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.65.0",
     "react-router-dom": "^7.9.4",
+    "sonner": "^2.0.7",
     "tailwindcss": "^4.1.14"
   },
   "devDependencies": {

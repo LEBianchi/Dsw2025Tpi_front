@@ -4,7 +4,6 @@ import LoginForm from '../components/LoginForm';
 const LoginPage = () => {
   const navigate = useNavigate();
 
-  // ESTA ES LA FUNCIÓN QUE FALTABA
   const handleSuccess = () => {
 
     navigate('/admin/home');

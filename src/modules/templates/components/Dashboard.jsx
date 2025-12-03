@@ -81,9 +81,12 @@ function Dashboard() {
           flex
           flex-col
           justify-between
+          
+          z-50  {/* <--- AGREGAR ESTO PARA QUE TAPE LO DE ATRÁS */}
 
           sm:relative
           sm:left-0
+          sm:z-0 {/* En escritorio no necesita z-index alto si no flota */}
         `}
       >
         <nav>

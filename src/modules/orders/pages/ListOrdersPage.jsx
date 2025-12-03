@@ -45,6 +45,7 @@ function ListOrdersPage() {
 
       const filters = {
         page: pageNumber,
+        pageSize: pageSize,
         search: searchTerm,
       };
 
@@ -95,140 +96,176 @@ function ListOrdersPage() {
   };
 
   return (
-    <div className="p-4">
-      <Card>
-        <div className='flex justify-between items-center mb-3'>
-          <h1 className='text-3xl font-bold'>Ordenes</h1>
-          <div className='h-11 w-11 sm:hidden'></div>
-        </div>
-
-        <div className='flex flex-col sm:flex-row gap-4'>
-          <div className='flex items-center gap-3 w-full relative'>
-            <input
-              value={searchTerm}
-              onChange={(evt) => setSearchTerm(evt.target.value)}
-              type="text"
-              placeholder='Buscar ordenes...'
-              className='text-lg w-full border-b focus:outline-none focus:border-purple-500 py-2 pl-2 pr-12'
-            />
-
-            <Button
-              className='h-11 w-11 flex justify-center items-center absolute right-0 !bg-purple-100 rounded-lg'
-              onClick={handleSearch}
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-6 h-6"
-              >
-                <path
-                  d="M15.7955 15.8111L21 21M18 10.5C18 14.6421 14.6421 18 10.5 18C6.35786 18 3 14.6421 3 10.5C3 6.35786 6.35786 3 10.5 3C14.6421 3 18 6.35786 18 10.5Z"
-                  stroke="#6b21a8"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </Button>
-          </div>
-
-          <select
-            onChange={evt => {
-              setStatus(evt.target.value);
-              setPageNumber(1);
-            }}
-            className='text-lg border-b bg-transparent focus:outline-none py-2'
-            value={status}
-          >
-            <option value="">Estado de Orden</option>
-            <option value="1">Pendientes</option>
-            <option value="2">Procesando</option>
-            <option value="3">Enviadas</option>
-            <option value="4">Entregadas</option>
-            <option value="5">Canceladas</option>
-          </select>
-        </div>
-      </Card>
-
-      <div className='mt-4 flex flex-col gap-4'>
-        {loading ? (
-          <div className='text-center p-4 bg-white rounded shadow'>
-            <span>Buscando datos...</span>
-          </div>
-        ) : orders.length > 0 ? (
-          orders.map(order => {
-
-            return (
-              <Card key={order.orderId || Math.random()} className="hover:shadow-md transition-shadow">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <div>
-                    <h1 className='text-xl font-bold text-gray-800'>
-                      #{order.clientName || order.customerName || 'Consumidor Final'}
-                    </h1>
-
-                    <p className='text-sm text-gray-600'>
-                      {statusLabels[order.status] || 'Estado desconocido'}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
-                    <span
-                      className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusChipClass(order.status)}`}
-                    >
-                      {statusLabels[order.status] || 'Estado desconocido'}
-                    </span>
-
-                    <Button onClick={() => console.log('Ver detalle', order.orderId)}>
-                      Ver
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            );
-          })
-        ) : (
-          <Card>
-            <p className="text-center text-gray-500">No se encontraron órdenes.</p>
-            <p className="text-center text-xs text-gray-400">(Chequeá la consola para ver qué respondió el servidor simulado)</p>
-          </Card>
-        )}
+  <div className="p-4 space-y-4">
+    {/* --- HEADER: BUSCADOR Y FILTROS --- */}
+    <Card className="p-4 bg-white rounded-lg shadow-sm">
+      <div className='flex justify-between items-center mb-3'>
+        <h1 className='text-2xl font-bold text-gray-800'>Ordenes</h1>
+        <div className='h-11 w-11 sm:hidden'></div>
       </div>
 
-      <div className='flex justify-center items-center mt-6 mb-8 gap-4'>
-        <button
-          disabled={pageNumber === 1}
-          onClick={() => setPageNumber(pageNumber - 1)}
-          className='bg-gray-200 disabled:opacity-50 px-4 py-2 rounded hover:bg-gray-300 transition'
-        >
-          Atras
-        </button>
+      <div className='flex flex-col sm:flex-row gap-4'>
+        <div className='flex items-center gap-3 w-full relative'>
+          <input
+            value={searchTerm}
+            onChange={(evt) => setSearchTerm(evt.target.value)}
+            type="text"
+            placeholder='Buscar ordenes...'
+            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-200 pl-2 pr-12"
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          />
 
-        <span className="font-bold text-gray-700">{pageNumber} / {totalPages || 1}</span>
-
-        <button
-          disabled={pageNumber >= totalPages}
-          onClick={() => setPageNumber(pageNumber + 1)}
-          className='bg-gray-200 disabled:opacity-50 px-4 py-2 rounded hover:bg-gray-300 transition'
-        >
-          Siguiente
-        </button>
+          <Button
+            className='h-10 w-10 flex justify-center items-center absolute right-0 !bg-purple-100 rounded-md hover:bg-purple-200 text-purple-700'
+            onClick={handleSearch}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-5 h-5"
+            >
+              <path
+                d="M15.7955 15.8111L21 21M18 10.5C18 14.6421 14.6421 18 10.5 18C6.35786 18 3 14.6421 3 10.5C3 6.35786 6.35786 3 10.5 3C14.6421 3 18 6.35786 18 10.5Z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </Button>
+        </div>
 
         <select
-          value={pageSize}
           onChange={evt => {
+            setStatus(evt.target.value);
             setPageNumber(1);
-            setPageSize(Number(evt.target.value));
           }}
-          className='border rounded p-2 bg-white'
+          className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-200 min-w-[200px]"
+          value={status}
         >
-          <option value="5">5</option>
-          <option value="10">10</option>
-          <option value="20">20</option>
+          <option value="">Estado de Orden</option>
+          <option value="1">Pendientes</option>
+          <option value="2">Procesando</option>
+          <option value="3">Enviadas</option>
+          <option value="4">Entregadas</option>
+          <option value="5">Canceladas</option>
         </select>
       </div>
+    </Card>
+
+    {/* --- LISTADO DE ORDENES --- */}
+    <div className='mt-4 flex flex-col gap-3'>
+      {loading ? (
+        <div className='text-center py-10 text-gray-500 bg-white rounded shadow-sm'>
+          <span>Cargando ordenes...</span>
+        </div>
+      ) : orders.length > 0 ? (
+        orders.map(order => (
+          <Card key={order.orderId || Math.random()} className="hover:shadow-md transition-shadow bg-white rounded-lg p-4 border border-gray-100">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              
+              {/* COLUMNA IZQUIERDA: NOMBRE Y AHORA EL GLOBO DE ESTADO */}
+              <div className="flex flex-col items-start gap-2">
+                <h1 className='text-lg font-bold text-gray-900'>
+                  #{order.clientName || order.customerName || 'Consumidor Final'}
+                </h1>
+                
+                {/* --- AQUI MOVI EL GLOBO --- */}
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${getStatusChipClass(order.status)}`}
+                >
+                  {statusLabels[order.status] || 'Desconocido'}
+                </span>
+              </div>
+
+              {/* COLUMNA DERECHA: SOLO EL BOTÓN VER */}
+              <div className="flex items-center gap-4 w-full sm:w-auto justify-end">
+                <Button
+                  className="bg-purple-100 text-purple-700 px-4 py-2 rounded-md font-medium hover:bg-purple-200 transition text-sm w-full sm:w-auto"
+                  onClick={() => console.log('Ver detalle', order.orderId)}
+                >
+                  Ver
+                </Button>
+              </div>
+            </div>
+          </Card>
+        ))
+      ) : (
+        <Card className="p-8 text-center bg-white rounded-lg border border-dashed border-gray-300">
+          <p className="text-gray-500">No se encontraron órdenes.</p>
+        </Card>
+      )}
     </div>
-  );
+
+    {/* --- PAGINACIÓN RESPONSIVA --- */}
+    {totalPages > 0 && (
+      <>
+        {/* 📱 MOBILE (Visible solo en móvil) */}
+        <div className="flex justify-between items-center text-sm text-gray-600 sm:hidden py-4 w-full px-4 border-t border-gray-100 mt-2">
+          <button
+            disabled={pageNumber === 1}
+            onClick={() => setPageNumber(p => p - 1)}
+            className="disabled:opacity-30 font-medium"
+          >
+            ← Anterior
+          </button>
+
+          <span className="text-xs font-bold text-gray-500">
+            {pageNumber} / {totalPages}
+          </span>
+
+          <button
+            disabled={pageNumber >= totalPages}
+            onClick={() => setPageNumber(p => p + 1)}
+            className="disabled:opacity-30 font-medium"
+          >
+            Siguiente →
+          </button>
+        </div>
+
+        {/* 💻 DESKTOP (Visible solo en PC) */}
+        <div className="hidden sm:flex justify-center items-center gap-4 py-4 text-sm text-gray-600 mt-2">
+          <button
+            disabled={pageNumber === 1}
+            onClick={() => setPageNumber(p => p - 1)}
+            className="hover:text-black disabled:opacity-30 disabled:hover:text-gray-600 flex items-center gap-1 transition-colors"
+          >
+            ← Anterior
+          </button>
+
+          <span className="bg-gray-900 text-white px-3 py-1 rounded text-xs font-bold shadow-sm">
+            Página {pageNumber} de {totalPages || 1}
+          </span>
+
+          <button
+            disabled={pageNumber >= totalPages}
+            onClick={() => setPageNumber(p => p + 1)}
+            className="hover:text-black disabled:opacity-30 disabled:hover:text-gray-600 flex items-center gap-1 transition-colors"
+          >
+            Siguiente →
+          </button>
+
+          <div className="flex items-center gap-2 border-l border-gray-300 pl-4 ml-2">
+            <span className="text-xs text-gray-400">Ver:</span>
+            <select
+              value={pageSize}
+              onChange={(evt) => {
+                setPageNumber(1);
+                setPageSize(Number(evt.target.value));
+              }}
+              className="border border-gray-200 rounded p-1 text-sm bg-white focus:outline-none focus:border-purple-300 cursor-pointer hover:shadow-sm transition-shadow"
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+            </select>
+          </div>
+        </div>
+      </>
+    )}
+  </div>
+);
 }
 
 export default ListOrdersPage;

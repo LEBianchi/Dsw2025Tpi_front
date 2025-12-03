@@ -9,6 +9,7 @@ import ListProductsPage from './modules/products/pages/ListProductsPage';
 import CreateProductPage from './modules/products/pages/CreateProductPage';
 import ClientProductsPage from './modules/products/pages/ClientProductsPage';
 import CartPage from './modules/orders/pages/CartPage';
+import { Toaster } from 'sonner';
 
 function App() {
   const router = createBrowserRouter([
@@ -48,6 +49,7 @@ function App() {
 
   return (
     <AuthProvider>
+      <Toaster position="top-right" richColors />
       <RouterProvider router={router} />
     </AuthProvider>
   );
