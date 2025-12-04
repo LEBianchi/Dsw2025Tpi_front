@@ -2,11 +2,9 @@ import { useState } from 'react';
 import useAuth from '../hook/useAuth';
 import { register } from '../services/login';
 
-// 1. Agregamos la prop 'initiallyRegistering' (por defecto false para Login)
 const LoginForm = ({ onSuccess, initiallyRegistering = false }) => {
   const { singin } = useAuth();
 
-  // 2. Usamos esa prop para el estado inicial
   const [isRegistering, setIsRegistering] = useState(initiallyRegistering);
 
   const [username, setUsername] = useState('');

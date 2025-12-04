@@ -219,7 +219,6 @@ function CartPage() {
         {cartItems.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
 
-            {/* --- NUEVO ICONO SVG VACÍO --- */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
